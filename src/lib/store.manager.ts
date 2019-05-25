@@ -25,11 +25,12 @@ export class StoreManager {
           }
         }
       }
+      return state;
     });
   }
 
   addAction(storeName, actionType, service, method) {
-    if (this.reducers.indexOf(storeName)===-1) {
+    if (this.reducers.indexOf(storeName) === -1) {
       this.addState(storeName);
     }
     this.actions[storeName] = this.actions[storeName] || {};
