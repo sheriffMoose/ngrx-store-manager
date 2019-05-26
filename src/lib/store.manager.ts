@@ -1,5 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken } from '@angular/core';
 import { ReducerManager } from '@ngrx/store';
+import { StoreConfig } from './store.model';
+
+export const STORE_CONFIG = new InjectionToken<StoreConfig[]>('STORE_CONFIG');
 
 @Injectable()
 export class StoreManager {
