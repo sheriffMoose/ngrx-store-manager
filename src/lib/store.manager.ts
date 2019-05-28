@@ -3,32 +3,41 @@ import { ReducerManager } from '@ngrx/store';
 import { StoreConfig } from './store.model';
 
 export const STORE_CONFIG = new InjectionToken<StoreConfig[]>('STORE_CONFIG');
+export const STORE_OPTIONS = new InjectionToken<StoreConfig[]>('STORE_OPTIONS');
 
 @Injectable()
 export class StoreManager {
   reducers = [];
   actions = {};
 
-  constructor(private reducerManager: ReducerManager) { }
+  constructor(private reducerManager: ReducerManager, @Inject(STORE_OPTIONS) private options) { }
 
   addState(storeName, initialState?) {
     this.reducers.push(storeName);
     this.reducerManager.addReducer(storeName, (state = initialState, action) => {
+      let newState = state;
       if (action.store === storeName) {
         if (action.type.endsWith('DATA_SUCCESS')) {
-          return {
+          newState = {
             ...state,
             ...action.payload,
             isSuccessful: true
           }
         } else {
-          return {
-            ...state,
-            isSuccessful: false
+          if (this.options && this.options.useLocalStorage && !initialState) {
+            newState = localStorage.getItem(storeName);
+          } else {
+            newState = {
+              ...state,
+              isSuccessful: false
+            }
           }
         }
       }
-      return state;
+      if (this.options && this.options.useLocalStorage) {
+        localStorage.setItem(storeName, newState);
+      }
+      return newState;
     });
   }
 

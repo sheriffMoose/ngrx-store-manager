@@ -1,8 +1,8 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, Inject } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, filter, map, mergeMap } from 'rxjs/operators';
-import { StoreManager } from './store.manager';
+import { StoreManager, STORE_OPTIONS } from './store.manager';
 import { StoreFacade } from './store.facade';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class StoreEffects {
         if (action.service && action.method) {
           returnObservable = this.injector.get(action.service)[action.method](this.storeFacade, action.payload);
         } else {
-          returnObservable = of(action.payload || {});
+          returnObservable = this.getPayloadObservable(action);
         }
 
         return returnObservable.pipe(
@@ -31,6 +31,16 @@ export class StoreEffects {
     private actions$: Actions,
     private injector: Injector,
     private storeManager: StoreManager,
-    private storeFacade: StoreFacade
+    private storeFacade: StoreFacade,
+    @Inject(STORE_OPTIONS) private options
   ) { }
+
+  getPayloadObservable(action) {
+    if (this.options && this.options.useLocalStorage) {
+      const item = localStorage.getItem(action.store);
+      return of(item === 'undefined' ? {} : item || {});
+    } else {
+      return of(action.payload || {});
+    }
+  }
 }
