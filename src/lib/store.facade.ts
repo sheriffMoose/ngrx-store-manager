@@ -19,13 +19,17 @@ export class StoreFacade {
     }
   }
 
-  getData(storeName: string, action = 'GET') {
-    this.store.dispatch(this.storeManager.getAction(storeName, action));
+  dispatch(storeName: string, action: string, payload?) {
+    this.store.dispatch(this.storeManager.getAction(storeName, action, payload));
     return this.store.pipe(select(storeName)).pipe(filter(payload => !!payload && !!payload.isSuccessful), take(1));
   }
 
+  getData(storeName: string, action = 'GET') {
+    return this.dispatch(storeName, action);
+  }
+
   setData(storeName: string, payload, action = 'SET') {
-    this.store.dispatch(this.storeManager.getAction(storeName, action, payload));
-    return this.store.pipe(select(storeName)).pipe(filter(payload => !!payload && !!payload.isSuccessful), take(1));
+    return this.dispatch(storeName, action, payload);
+
   }
 }

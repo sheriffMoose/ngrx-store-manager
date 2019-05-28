@@ -1,10 +1,10 @@
-import { NgModule, ModuleWithProviders, APP_INITIALIZER, Optional, Inject } from '@angular/core';
+import { NgModule, ModuleWithProviders, Optional, Inject } from '@angular/core';
 
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from '@ngrx/effects';
 
-import { StoreManager, STORE_CONFIG } from './store.manager';
+import { StoreManager, STORE_CONFIG, STORE_OPTIONS } from './store.manager';
 import { StoreFacade } from './store.facade';
 import { StoreEffects } from './store.effects';
 import { StoreConfig } from './store.model';
@@ -21,10 +21,13 @@ import { StoreConfig } from './store.model';
 })
 export class StoreManagerModule {
 
-  static forRoot(config: StoreConfig[]): ModuleWithProviders {
+  static forRoot(config: StoreConfig[], options = { useLocalStorage: false }): ModuleWithProviders {
     return {
       ngModule: StoreManagerModule,
-      providers: [StoreManager, StoreFacade, { provide: STORE_CONFIG, useValue: config, multi: true }]
+      providers: [StoreManager, StoreFacade,
+        { provide: STORE_CONFIG, useValue: config, multi: true },
+        { provide: STORE_OPTIONS, useValue: options, multi: true }
+      ]
     };
   }
 
