@@ -26,7 +26,7 @@ export class StoreManagerModule {
       ngModule: StoreManagerModule,
       providers: [StoreManager, StoreFacade,
         { provide: STORE_CONFIG, useValue: config, multi: true },
-        { provide: STORE_OPTIONS, useValue: options, multi: true }
+        { provide: STORE_OPTIONS, useValue: options }
       ]
     };
   }
