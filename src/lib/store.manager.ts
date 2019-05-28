@@ -1,4 +1,4 @@
-import { Injectable, InjectionToken } from '@angular/core';
+import { Injectable, InjectionToken, Inject } from '@angular/core';
 import { ReducerManager } from '@ngrx/store';
 import { StoreConfig } from './store.model';
 
@@ -15,27 +15,23 @@ export class StoreManager {
   addState(storeName, initialState?) {
     this.reducers.push(storeName);
     this.reducerManager.addReducer(storeName, (state = initialState, action) => {
-      let newState = state;
+      let newState = this.getLocalItem(storeName, initialState);
       if (action.store === storeName) {
         if (action.type.endsWith('DATA_SUCCESS')) {
           newState = {
             ...state,
             ...action.payload,
             isSuccessful: true
-          }
+          };
         } else {
-          if (this.options && this.options.useLocalStorage && !initialState) {
-            newState = localStorage.getItem(storeName);
-          } else {
-            newState = {
-              ...state,
-              isSuccessful: false
-            }
-          }
+          newState = {
+            ...state,
+            isSuccessful: false
+          };
         }
       }
       if (this.options && this.options.useLocalStorage) {
-        localStorage.setItem(storeName, newState);
+        localStorage.setItem(storeName, JSON.stringify(newState));
       }
       return newState;
     });
@@ -53,12 +49,21 @@ export class StoreManager {
 
   getAction(store, type, payload?, status = 'ACTION') {
     return {
-      store: store,
+      store,
       _type: type,
       type: `[${store}] ${type}_DATA_${status}`,
       service: ((this.actions[store] || {})[type] || {}).service,
       method: ((this.actions[store] || {})[type] || {}).method,
-      payload: payload
+      payload
+    };
+  }
+
+  getLocalItem(storeName, payload) {
+    if (this.options.useLocalStorage) {
+      const item = localStorage.getItem(storeName);
+      return item === 'undefined' ? {} : JSON.parse(item) || payload || {};
+    } else {
+      return payload || {};
     }
   }
 }
